@@ -1,0 +1,30 @@
+# Render Blueprint: Dashboard -> New -> Blueprint -> pick this repository
+services:
+  - type: web
+    name: hum1-site
+    runtime: node
+    plan: free
+    buildCommand: npm install --no-audit --no-fund
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: ADMIN_PASSWORD
+        sync: false          # Render will ask you to type it
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+    # Free plan wipes files on every restart. To keep your admin edits and briefs, switch to a paid plan
+    # (change "plan: free" to "plan: starter") and uncomment the next lines:
+    # disk:
+    #   name: hum1-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
+    # and add one more variable under envVars:
+    #   - key: DATA_DIR
+    #     value: /var/data

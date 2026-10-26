@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Hum1 admin</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+<main id="login" class="login" hidden>
+  <form id="login-form" class="box" autocomplete="on">
+    <h1>Hum1 admin</h1>
+    <p class="muted">Sign in to edit texts, prices and gallery, and to read new briefs.</p>
+    <label for="pw">Password</label>
+    <input id="pw" class="in" type="password" autocomplete="current-password" required autofocus>
+    <p id="login-err" class="err" role="alert" hidden></p>
+    <button class="btn" type="submit">Sign in</button>
+  </form>
+</main>
+<div id="app" hidden>
+  <header class="top">
+    <strong class="brand">Hum1 <span>admin</span></strong>
+    <nav id="tabs" aria-label="Sections"></nav>
+    <a class="link" href="/" target="_blank" rel="noopener">View site</a>
+    <button class="ghost" id="logout" type="button">Log out</button>
+  </header>
+  <main id="panels"></main>
+  <div id="savebar" class="savebar" hidden><span id="savecount"></span><button class="ghost" id="discard" type="button">Discard</button><button class="btn" id="save" type="button">Save changes</button></div>
+</div>
+<div id="toast" class="toast" role="status"></div>
+<script src="/js/admin.js" defer></script>
+</body>
+</html>
