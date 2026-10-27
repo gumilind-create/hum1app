@@ -633,3 +633,21 @@ body.ty-open{overflow:hidden}
 @media (max-width:1000px){.xg{grid-template-columns:repeat(2,1fr)}.incl ul{grid-template-columns:1fr 1fr}}
 @media (max-width:900px){.care{grid-template-columns:1fr}}
 @media (max-width:640px){.xg,.incl ul,.care-list{grid-template-columns:1fr}.incl{padding:22px 20px}}
+
+/* ---- Премиальный интерактивный фон ---- */
+#bg,
+#planet,
+body::before,
+html::after {
+  display: none !important;
+}
+
+#premium-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  display: block;
+}
