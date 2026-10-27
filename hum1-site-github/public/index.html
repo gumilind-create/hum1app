@@ -294,4 +294,220 @@
 </footer>
 <script defer src="/js/config.js"></script>
 <script defer src="/js/app.js"></script><div aria-labelledby="bf-tyt" aria-modal="true" class="ty" hidden id="bf-ty" role="dialog"><div class="ty-box"><div class="ty-ic"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div><h3 data-c="thanks.01" id="bf-tyt">Thank you for completing the test!</h3><p data-c="thanks.02">We have received your answers and will contact you very soon to discuss your website and the final price.</p><button class="btn btn-main" data-c="thanks.03" id="bf-tyc" type="button">Close</button></div></div></body>
+  <canvas id="premium-bg" aria-hidden="true"></canvas>
+<script>
+(function () {
+  const canvas = document.getElementById('premium-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d', { alpha: false });
+
+  let w = 0, h = 0, dpr = 1;
+  let dots = [];
+
+  function initGrid() {
+    dots = [];
+    const spacing = w < 700 ? 48 : 38;
+    const cols = Math.ceil(w / spacing) + 1;
+    const rows = Math.ceil(h / spacing) + 1;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        dots.push({ x: c * spacing, y: r * spacing });
+      }
+    }
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    initGrid();
+  }
+
+  window.addEventListener('resize', resize, { passive: true });
+  resize();
+
+  // Плавная пружинная физика скролла
+  let targetScroll = window.scrollY || 0;
+  let smoothScroll = targetScroll;
+  let scrollVelocity = 0;
+  let pulseEnergy = 0;
+
+  window.addEventListener('scroll', () => {
+    targetScroll = window.scrollY || 0;
+  }, { passive: true });
+
+  // Плавное следование за курсором
+  let mouse = { x: w * 0.5, y: h * 0.35, tx: w * 0.5, ty: h * 0.35 };
+  window.addEventListener('mousemove', (e) => {
+    mouse.tx = e.clientX;
+    mouse.ty = e.clientY;
+  }, { passive: true });
+
+  // Реакция на кнопку в шапке (#theme)
+  const themeBtn = document.getElementById('theme');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      pulseEnergy = 1.6;
+    });
+  }
+
+  // Оптические блики (глубинный параллакс)
+  const orbs = Array.from({ length: 14 }, (_, i) => ({
+    x: Math.random(),
+    y: Math.random() * 2.5,
+    r: 60 + Math.random() * 140,
+    speed: 0.15 + Math.random() * 0.45,
+    phase: Math.random() * Math.PI * 2,
+    hue: i % 2 === 0 ? '63, 208, 208' : '124, 92, 255'
+  }));
+
+  function render(now) {
+    const t = now * 0.00065;
+
+    // Расчёт инерции скролла
+    const diff = targetScroll - smoothScroll;
+    smoothScroll += diff * 0.085;
+    scrollVelocity = diff * 0.085;
+    const speedFactor = Math.min(Math.abs(scrollVelocity) * 0.025, 1.5);
+    pulseEnergy *= 0.95;
+
+    mouse.x += (mouse.tx - mouse.x) * 0.07;
+    mouse.y += (mouse.ty - mouse.y) * 0.07;
+
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - h);
+    const progress = Math.min(1, Math.max(0, smoothScroll / maxScroll));
+
+    // 1. Глубокий обсидиановый фон
+    ctx.fillStyle = '#01030A';
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. Атмосферное свечение (меняет положение и оттенок при скролле)
+    const aura1X = w * (0.72 - Math.sin(progress * Math.PI * 1.3) * 0.42) + (mouse.x - w * 0.5) * 0.08;
+    const aura1Y = h * (0.28 + Math.cos(progress * Math.PI) * 0.18) + (mouse.y - h * 0.5) * 0.08;
+    const g1 = ctx.createRadialGradient(aura1X, aura1Y, 0, aura1X, aura1Y, Math.max(w, h) * 0.58);
+    g1.addColorStop(0, 'rgba(63, 208, 208, 0.12)');
+    g1.addColorStop(0.45, 'rgba(4, 108, 112, 0.05)');
+    g1.addColorStop(1, 'rgba(1, 3, 10, 0)');
+    ctx.fillStyle = g1;
+    ctx.fillRect(0, 0, w, h);
+
+    const aura2X = w * (0.22 + Math.cos(progress * Math.PI * 1.5) * 0.35);
+    const aura2Y = h * (0.72 - Math.sin(progress * Math.PI) * 0.22);
+    const g2 = ctx.createRadialGradient(aura2X, aura2Y, 0, aura2X, aura2Y, Math.max(w, h) * 0.52);
+    g2.addColorStop(0, 'rgba(91, 59, 196, 0.11)');
+    g2.addColorStop(0.5, 'rgba(63, 208, 208, 0.03)');
+    g2.addColorStop(1, 'rgba(1, 3, 10, 0)');
+    ctx.fillStyle = g2;
+    ctx.fillRect(0, 0, w, h);
+
+    // 3. Архитектурная микро-сетка с подсветкой вокруг курсора и волны
+    const spotlightRadius = 320;
+    const spotlightR2 = spotlightRadius * spotlightRadius;
+    const waveCenterY = h * (0.52 - Math.sin(progress * Math.PI * 2) * 0.12);
+
+    for (let i = 0; i < dots.length; i++) {
+      const d = dots[i];
+      const dx = d.x - mouse.x;
+      const dy = d.y - mouse.y;
+      const dist2 = dx * dx + dy * dy;
+
+      // Базовая видимость + реакция на курсор
+      let alpha = 0.045;
+      if (dist2 < spotlightR2) {
+        const k = 1 - Math.sqrt(dist2) / spotlightRadius;
+        alpha += k * k * 0.28;
+      }
+
+      // Подсветка от проходящей скролл-волны
+      const waveDist = Math.abs(d.y - waveCenterY);
+      if (waveDist < 180) {
+        alpha += (1 - waveDist / 180) * (0.05 + speedFactor * 0.06);
+      }
+
+      ctx.fillStyle = `rgba(145, 225, 225, ${alpha})`;
+      ctx.fillRect(d.x, d.y, 1.4, 1.4);
+    }
+
+    // 4. 3D-ленты жидкого света (Silk Ribbons), реагирующие на скролл
+    const ribbonCount = 28;
+    const segments = w < 700 ? 45 : 80;
+    const scrollPhase = smoothScroll * 0.0032;
+    const tiltShift = scrollVelocity * 0.35;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+
+    for (let i = 0; i < ribbonCount; i++) {
+      const norm = i / (ribbonCount - 1); // 0..1
+      const spread = (norm - 0.5) * (h * 0.55);
+
+      ctx.beginPath();
+      for (let s = 0; s <= segments; s++) {
+        const xRatio = s / segments;
+        const x = xRatio * w;
+
+        // Многослойная гармоническая волна (скролл + время + курсор)
+        const wave1 = Math.sin(xRatio * 4.2 + t * 1.4 + scrollPhase + i * 0.11) * (55 + pulseEnergy * 35);
+        const wave2 = Math.cos(xRatio * 2.6 - t * 0.9 - scrollPhase * 1.3 + i * 0.17) * 42;
+        const wave3 = Math.sin(xRatio * 7.5 + scrollPhase * 2.1 + i * 0.08) * (16 + speedFactor * 22);
+
+        // Мягкое притяжение волны к курсору мыши
+        const mDist = Math.abs(x - mouse.x) / w;
+        const mousePull = Math.max(0, 1 - mDist * 2.5) * ((mouse.y - h * 0.5) * 0.18);
+
+        // Перспективное сжатие по краям и раскрытие в центре
+        const envelope = Math.sin(xRatio * Math.PI);
+        const y = waveCenterY
+          + spread * (0.35 + envelope * 0.65)
+          + (wave1 + wave2 + wave3) * (0.5 + envelope * 0.5)
+          + mousePull
+          - tiltShift * (xRatio - 0.5);
+
+        if (s === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      // Градиент вдоль каждой нити: от прозрачного к неоновому бирюзовому и индиго
+      const lineGrad = ctx.createLinearGradient(0, 0, w, 0);
+      const centerGlow = Math.sin(norm * Math.PI);
+      const baseAlpha = (0.04 + centerGlow * 0.16) + Math.min(speedFactor * 0.08, 0.1) + pulseEnergy * 0.08;
+
+      lineGrad.addColorStop(0, 'rgba(63, 208, 208, 0)');
+      lineGrad.addColorStop(0.25, `rgba(63, 208, 208, ${baseAlpha * 0.85})`);
+      lineGrad.addColorStop(0.55, `rgba(125, 245, 245, ${baseAlpha * 1.25})`);
+      lineGrad.addColorStop(0.8, `rgba(110, 85, 235, ${baseAlpha * 0.9})`);
+      lineGrad.addColorStop(1, 'rgba(91, 59, 196, 0)');
+
+      ctx.strokeStyle = lineGrad;
+      ctx.lineWidth = i % 5 === 0 ? 1.5 : 0.9;
+      ctx.stroke();
+    }
+
+    // 5. Оптические блики с параллаксом при прокрутке
+    for (let i = 0; i < orbs.length; i++) {
+      const o = orbs[i];
+      const ox = (o.x * w + Math.sin(t + o.phase) * 40 + w) % w;
+      const rawY = o.y * h - smoothScroll * o.speed;
+      const totalH = h + o.r * 4;
+      const oy = ((rawY % totalH) + totalH) % totalH - o.r * 2;
+
+      const og = ctx.createRadialGradient(ox, oy, 0, ox, oy, o.r);
+      og.addColorStop(0, `rgba(${o.hue}, 0.045)`);
+      og.addColorStop(1, `rgba(${o.hue}, 0)`);
+      ctx.fillStyle = og;
+      ctx.beginPath();
+      ctx.arc(ox, oy, o.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
+})();
+</script>
 </html>
